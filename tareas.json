@@ -1,0 +1,168 @@
+{
+  "version": 4,
+  "actualizado": "2026-07-17",
+  "tareas": [
+    {
+      "id": "e0",
+      "phase": "Diseño conceptual",
+      "name": "Etapa 0 · Procedimiento (PO-ER-01) + 5 fichas",
+      "start": "2026-05-01",
+      "end": "2026-05-25",
+      "status": "completada",
+      "note": "Procedimiento de escenario de impacto/riesgo y 5 fichas: escenario y alcance, amenaza, población e impacto, escenarios + cursos de acción, plan comunicacional."
+    },
+    {
+      "id": "e1",
+      "phase": "Prototipo y arquitectura de datos",
+      "name": "Etapa 1 · Prototipo HTML de las fichas",
+      "start": "2026-05-20",
+      "end": "2026-05-26",
+      "status": "completada",
+      "note": "Las 5 fichas llevadas a un tablero de escenario de impacto en HTML."
+    },
+    {
+      "id": "e2",
+      "phase": "Prototipo y arquitectura de datos",
+      "name": "Etapa 2 · Arquitectura de datos + geoproceso ArcGIS",
+      "start": "2026-05-26",
+      "end": "2026-06-05",
+      "status": "completada",
+      "note": "Evaluación localStorage / Supabase / ArcGIS REST. Se define el geoproceso: coberturas de peligro para estimar población e infraestructura expuesta."
+    },
+    {
+      "id": "e3",
+      "phase": "Implementación en ArcGIS Online",
+      "name": "Etapa 3 · Transferencia a AGOL (Survey123 + sprints 1–3b)",
+      "start": "2026-05-30",
+      "end": "2026-06-09",
+      "status": "completada",
+      "note": "Survey123 con índice P×E×V, Web Map de amenazas e infraestructura, dashboard ejecutivo y ficha PDF automática (Power Automate)."
+    },
+    {
+      "id": "h1",
+      "phase": "Coordinación institucional",
+      "name": "Etapa 4 · Presentación a Directora Nacional",
+      "start": "2026-06-19",
+      "end": "2026-06-19",
+      "status": "hito",
+      "note": "Feedback: coordinar con SID (eventos históricos), colaboración interinstitucional para levantar capacidades, y analizar planes nacionales/regionales + anexos para levantar cursos de acción."
+    },
+    {
+      "id": "h2",
+      "phase": "Coordinación institucional",
+      "name": "Etapa 5 · Reunión con M. Riffo (VISOR GRD)",
+      "start": "2026-06-25",
+      "end": "2026-06-25",
+      "status": "hito",
+      "note": "El VISOR GRD ya tiene estructura de escenario de impacto (infraestructura y población expuesta + zonificación de amenaza). Opción: que su unidad construya el geoproceso en AGOL."
+    },
+    {
+      "id": "h3",
+      "phase": "Coordinación institucional",
+      "name": "Etapa 8 · Reunión con Jefe Depto Información Territorial",
+      "start": "2026-07-14",
+      "end": "2026-07-14",
+      "status": "hito",
+      "note": "Presentación del proyecto de escenarios de riesgo. Ratifica que el VISOR GRD está en actualización y hay disposición a incorporar nuevas herramientas. Se acuerda enviar el piloto para que la empresa a cargo evalúe la factibilidad de automatizar el proceso con los inputs disponibles."
+    },
+    {
+      "id": "e6",
+      "phase": "Consolidación de datos base",
+      "name": "Etapa 6 · Consolidación de cursos de acción (128 planes)",
+      "start": "2026-06-26",
+      "end": "2026-07-07",
+      "status": "completada",
+      "note": "De 2 a 128 planes, 5.348 COA, 17 regiones y 22 amenazas. Motor de consultas + análisis de brechas (30 brechas, 4 críticas)."
+    },
+    {
+      "id": "e7",
+      "phase": "Consolidación de datos base",
+      "name": "Etapa 7 · Consolidación de alertas históricas 2017–2025",
+      "start": "2026-07-01",
+      "end": "2026-07-09",
+      "status": "completada",
+      "note": "alertas_consolidado_2017_2025.xlsx, 37.124 filas validadas."
+    },
+    {
+      "id": "e7b",
+      "phase": "Consolidación de datos base",
+      "name": "Etapa 7b · Consolidación de eventos SID",
+      "start": "2026-07-08",
+      "end": "2026-08-15",
+      "status": "en_curso",
+      "note": "Auditados 4 de 28 archivos. Pendiente: eventos de origen antrópico y 24 archivos restantes."
+    },
+    {
+      "id": "p1",
+      "phase": "Pendientes · metodología y geoproceso",
+      "name": "Definir metodología de incorporación de COA al escenario",
+      "start": "2026-07-14",
+      "end": "2026-08-22",
+      "status": "pendiente",
+      "note": "Cómo se incorporan los cursos de acción al escenario de riesgo (regla de vínculo COA ↔ escenario por amenaza/nivel de alerta)."
+    },
+    {
+      "id": "p2",
+      "phase": "Pendientes · metodología y geoproceso",
+      "name": "Resolver llave CAT-SID y cruce SID × Alertas",
+      "start": "2026-07-10",
+      "end": "2026-08-15",
+      "status": "en_curso",
+      "note": "La llave (año + n° informe + letra) no calza con los archivos SID, donde \"Ampliación Evento\" concatena las letras. Destraba poblar T3_Eventos_SID."
+    },
+    {
+      "id": "p3",
+      "phase": "Pendientes · metodología y geoproceso",
+      "name": "Formalizar geoproceso AGOL con unidad de M. Riffo",
+      "start": "2026-07-15",
+      "end": "2026-09-15",
+      "status": "pendiente",
+      "note": "Definir quién construye el geoproceso y cómo el resultado de infraestructura/población expuesta alimenta el índice P×E×V."
+    },
+    {
+      "id": "p8",
+      "phase": "Pendientes · metodología y geoproceso",
+      "name": "Enviar piloto al VISOR GRD para evaluación de factibilidad",
+      "start": "2026-07-17",
+      "end": "2026-08-08",
+      "status": "pendiente",
+      "note": "Enviar el piloto al Depto de Información Territorial. La empresa a cargo de la actualización del VISOR GRD evaluará la factibilidad de incorporar una herramienta que automatice el proceso con los inputs de información disponibles."
+    },
+    {
+      "id": "p4",
+      "phase": "Pendientes · metodología y geoproceso",
+      "name": "Gestión de acceso a coberturas espaciales (AGOL)",
+      "start": "2026-08-01",
+      "end": "2026-09-30",
+      "status": "pendiente",
+      "note": "Población (censo/manzanas INE) e infraestructura crítica en el AGOL institucional."
+    },
+    {
+      "id": "p5",
+      "phase": "Pendientes · metodología y geoproceso",
+      "name": "Colaboración interinstitucional (levantamiento de capacidades)",
+      "start": "2026-08-01",
+      "end": "2026-10-31",
+      "status": "pendiente",
+      "note": "Mandato de la Directora, sin acciones concretas asociadas aún."
+    },
+    {
+      "id": "p6",
+      "phase": "Pendientes · metodología y geoproceso",
+      "name": "Retomar Sprint 4 · BOSAI + modelo de exposición",
+      "start": "2026-09-01",
+      "end": "2026-11-15",
+      "status": "en_pausa",
+      "note": "Hipótesis de escenario, árbol de fallas, ICO por institución, CA por nivel de alerta."
+    },
+    {
+      "id": "p7",
+      "phase": "Pendientes · metodología y geoproceso",
+      "name": "Definir integración del antecedente histórico (factor vs capa)",
+      "start": "2026-09-01",
+      "end": "2026-10-15",
+      "status": "pendiente",
+      "note": "¿Factor multiplicador del escenario base o capa independiente? A decidir con la Directora."
+    }
+  ]
+}
