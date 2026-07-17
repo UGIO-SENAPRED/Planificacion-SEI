@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEI — Carta Gantt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Paleta atardecer */
+    --peach:#F8B195; --coral:#F67280; --mauve:#C06C84; --purple:#6C5B7B; --blue:#355C7D;
+    /* Base dusk */
+    --bg:#1e1a26; --panel:#272134; --panel-2:#302843; --line:#443a58;
+    --text:#f2e4da; --muted:#9f8fa4; --muted-2:#786c82;
+    /* Estados */
+    --done:#F8B195;    --done-dim:rgba(248,177,149,.14);   --done-bd:rgba(248,177,149,.45);
+    --active:#F67280;  --active-dim:rgba(246,114,128,.15);  --active-bd:rgba(246,114,128,.45);
+    --paused:#d488a1;  --paused-dim:rgba(192,108,132,.17);  --paused-bd:rgba(192,108,132,.5);
+    --pending:#ab9cbd; --pending-dim:rgba(108,91,123,.22);  --pending-bd:rgba(108,91,123,.55);
+    --hito:#7ba6cc;
+    --hoy:#f6d3ba;
+    --serif:'Fraunces',serif;
+    --sans:'Bricolage Grotesque',sans-serif;
+    --mono:'Spline Sans Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);padding:32px;min-height:100vh;
+    background-image:radial-gradient(1100px 480px at 12% -12%, #f8b19510, transparent 62%),
+                     radial-gradient(1000px 520px at 92% 4%, #355c7d18, transparent 60%);}
+  .wrap{max-width:1220px;margin:0 auto;}
+
+  header{position:relative;overflow:hidden;margin-bottom:26px;padding:20px 22px 22px;
+    border:1px solid var(--line);border-radius:16px;
+    background:linear-gradient(155deg,#33284a 0%,#2a2340 45%,#242c3d 100%);}
+  .contour{position:absolute;inset:0;z-index:0;opacity:.55;pointer-events:none;}
+  .head-inner{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:18px;}
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:0.22em;text-transform:uppercase;color:var(--peach);margin-bottom:10px;}
+  h1{font-family:var(--serif);font-size:34px;font-weight:600;margin:0;letter-spacing:-0.015em;font-optical-sizing:auto;}
+  h1 em{font-style:italic;font-weight:400;color:var(--coral);}
+  .subtitle{color:var(--muted);font-size:13px;margin-top:8px;max-width:580px;line-height:1.55;}
+  .stat{text-align:right;flex-shrink:0;}
+  .stat .n{font-family:var(--serif);font-size:44px;font-weight:600;color:var(--peach);line-height:.9;font-optical-sizing:auto;}
+  .stat .l{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-top:6px;}
+
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:16px;font-size:12px;color:var(--muted);}
+  .legend span{display:inline-flex;align-items:center;gap:7px;}
+  .dot{width:10px;height:10px;border-radius:3px;display:inline-block;}
+  .dot.diamond{border-radius:1px;transform:rotate(45deg);width:9px;height:9px;}
+
+  .board{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  .phase-row{padding:11px 18px;background:var(--panel-2);font-family:var(--serif);font-size:14px;font-weight:600;font-style:italic;color:var(--text);border-top:1px solid var(--line);}
+  .phase-row:first-child{border-top:none;}
+
+  .grid-scroll{overflow-x:auto;}
+  .chart{position:relative;min-width:1000px;}
+  .months{display:flex;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:2;}
+  .month-label{flex-shrink:0;font-family:var(--mono);font-size:10px;color:var(--muted-2);padding:8px 0 8px 7px;border-left:1px solid var(--line);text-transform:uppercase;letter-spacing:0.06em;}
+
+  .task-row{display:flex;align-items:center;border-top:1px solid #362d47;position:relative;height:46px;transition:background .12s ease;}
+  .task-row:hover{background:#2c2539;}
+  .task-name{position:sticky;left:0;width:308px;flex-shrink:0;padding:0 14px;font-size:12.5px;font-weight:500;color:var(--text);background:inherit;z-index:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .task-row:not(:hover) .task-name{background:var(--panel);}
+  .track{position:relative;flex:1;height:100%;}
+
+  .bar{position:absolute;top:12px;height:22px;border-radius:6px;cursor:pointer;display:flex;align-items:center;padding:0 9px;
+    font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.03em;white-space:nowrap;overflow:hidden;
+    transition:filter .15s ease,transform .1s ease,box-shadow .15s ease;border:1px solid transparent;}
+  .bar:hover{filter:brightness(1.12);transform:translateY(-1px);box-shadow:0 4px 14px #0007;}
+  .bar.completada{background:var(--done-dim);color:var(--done);border-color:var(--done-bd);}
+  .bar.en_curso{background:var(--active-dim);color:var(--active);border-color:var(--active-bd);}
+  .bar.en_pausa{background:var(--paused-dim);color:var(--paused);border-color:var(--paused-bd);}
+  .bar.pendiente{background:var(--pending-dim);color:var(--pending);border-color:var(--pending-bd);}
+
+  .mstone{position:absolute;top:13px;width:15px;height:15px;background:var(--hito);border:1px solid #1e1a26;
+    box-shadow:0 0 0 1px #7ba6cc66;transform:translateX(-50%) rotate(45deg);cursor:pointer;transition:filter .15s ease,box-shadow .15s ease;}
+  .mstone:hover{filter:brightness(1.15);box-shadow:0 0 0 3px #7ba6cc3a;}
+  .mstone-label{position:absolute;top:14px;font-family:var(--mono);font-size:10px;color:var(--hito);font-weight:500;white-space:nowrap;pointer-events:none;opacity:.9;}
+
+  .today-line{position:absolute;top:0;bottom:0;width:0;border-left:1.5px dashed var(--hoy);z-index:1;opacity:.75;}
+  .today-tag{position:absolute;top:-1px;font-family:var(--mono);font-size:9px;color:var(--hoy);font-weight:500;letter-spacing:0.08em;text-transform:uppercase;background:var(--bg);padding:1px 5px;border-radius:4px;transform:translateX(-50%);white-space:nowrap;border:1px solid #f6d3ba33;}
+
+  .footer{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-top:18px;flex-wrap:wrap;}
+  .hint{font-size:12px;color:var(--muted);line-height:1.65;border-left:2px solid var(--coral);padding-left:14px;max-width:760px;}
+  .hint b{color:var(--text);font-weight:600;}
+  .reset{font-family:var(--mono);font-size:11px;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:8px;padding:7px 13px;cursor:pointer;white-space:nowrap;transition:all .15s ease;}
+  .reset:hover{color:var(--text);border-color:var(--mauve);background:var(--panel-2);}
+
+  .tooltip{position:fixed;background:#191420;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:11.5px;color:var(--text);max-width:290px;pointer-events:none;z-index:10;display:none;line-height:1.55;box-shadow:0 8px 30px #000a;}
+  .tooltip .tt-name{font-family:var(--serif);font-size:13px;font-weight:600;}
+  .tooltip .tt-date{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px;}
+  .tooltip .status{font-family:var(--mono);font-size:10px;font-weight:500;margin-top:5px;text-transform:uppercase;letter-spacing:0.06em;}
+
+  @media (max-width:600px){
+    body{padding:16px;}
+    h1{font-size:26px;}
+    .stat .n{font-size:34px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg class="contour" viewBox="0 0 1200 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <g fill="none" stroke-width="1">
+        <path d="M-20,60 C180,20 380,120 600,80 C820,40 1000,140 1240,90" stroke="#F8B195"/>
+        <path d="M-20,100 C180,60 380,160 600,120 C820,80 1000,180 1240,130" stroke="#F67280"/>
+        <path d="M-20,140 C180,100 380,200 600,160 C820,120 1000,220 1240,170" stroke="#C06C84"/>
+        <path d="M-20,180 C200,150 400,230 620,195 C840,160 1020,250 1240,205" stroke="#6C5B7B"/>
+        <path d="M-20,22 C160,-10 360,70 580,38 C800,6 1000,96 1240,52" stroke="#355C7D"/>
+      </g>
+    </svg>
+    <div class="head-inner">
+      <div>
+        <div class="eyebrow">Sistema de Escenario de Impacto · SENAPRED</div>
+        <h1>Carta <em>Gantt</em></h1>
+        <div class="subtitle">Del procedimiento y las fichas a la consolidación de datos base. Haz clic en una barra para avanzar su estado; los rombos son hitos de coordinación.</div>
+      </div>
+      <div class="stat">
+        <div class="n" id="pct">—%</div>
+        <div class="l">Avance · tareas</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="legend">
+    <span><i class="dot" style="background:var(--done)"></i>Completada</span>
+    <span><i class="dot" style="background:var(--active)"></i>En curso</span>
+    <span><i class="dot" style="background:var(--paused)"></i>En pausa</span>
+    <span><i class="dot" style="background:var(--pending)"></i>Pendiente</span>
+    <span><i class="dot diamond" style="background:var(--hito)"></i>Hito</span>
+    <span><i class="dot" style="background:var(--hoy)"></i>Hoy</span>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <div class="footer">
+    <div class="hint">
+      <b>Cronología confirmada.</b> Fechas validadas contigo: Etapa 0 (1–25 may), presentación a la Directora (19 jun) y reunión con M. Riffo (25 jun). El estado de cada tarea se guarda en tu navegador; dime <b>"terminamos tal etapa"</b> y lo actualizo.
+    </div>
+    <button class="reset" onclick="reloadBoard()">↻ Recargar</button>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+<div id="toast" style="position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:#191420;border:1px solid var(--line);color:var(--text);font-family:var(--mono);font-size:12px;padding:9px 16px;border-radius:9px;box-shadow:0 8px 30px #000a;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:20;"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ============================================================
+   CONFIGURACIÓN SUPABASE
+   Pega aquí los dos datos de tu proyecto (Settings → API Keys).
+   Si los dejas en blanco, el tablero funciona igual con guardado
+   local en el navegador (modo respaldo).
+   ============================================================ */
+const SUPABASE_URL = 'PEGA_AQUI_TU_PROJECT_URL';        // ej: https://abcd1234.supabase.co
+const SUPABASE_KEY = 'PEGA_AQUI_TU_PUBLISHABLE_KEY';    // sb_publishable_...  (o la anon key)
+
+const USE_SUPABASE = /^https:\/\/.+\.supabase\.co/.test(SUPABASE_URL)
+                   && SUPABASE_KEY.length > 20 && !SUPABASE_KEY.startsWith('PEGA');
+let sb = null;
+if(USE_SUPABASE && window.supabase){ sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }
+
+const RANGE_START = new Date('2026-05-01');
+const RANGE_END   = new Date('2026-12-31');
+const TODAY       = new Date('2026-07-17');
+const STORAGE_KEY = 'sei-gantt';
+const EMBEDDED_VERSION = 4;
+
+const EMBEDDED_TASKS = [
+  {id:'e0', phase:'Diseño conceptual', name:'Etapa 0 · Procedimiento (PO-ER-01) + 5 fichas', start:'2026-05-01', end:'2026-05-25', status:'completada', note:'Procedimiento de escenario de impacto/riesgo y 5 fichas: escenario y alcance, amenaza, población e impacto, escenarios + cursos de acción, plan comunicacional.'},
+
+  {id:'e1', phase:'Prototipo y arquitectura de datos', name:'Etapa 1 · Prototipo HTML de las fichas', start:'2026-05-20', end:'2026-05-26', status:'completada', note:'Las 5 fichas llevadas a un tablero de escenario de impacto en HTML.'},
+  {id:'e2', phase:'Prototipo y arquitectura de datos', name:'Etapa 2 · Arquitectura de datos + geoproceso ArcGIS', start:'2026-05-26', end:'2026-06-05', status:'completada', note:'Evaluación localStorage / Supabase / ArcGIS REST. Se define el geoproceso: coberturas de peligro para estimar población e infraestructura expuesta.'},
+
+  {id:'e3', phase:'Implementación en ArcGIS Online', name:'Etapa 3 · Transferencia a AGOL (Survey123 + sprints 1–3b)', start:'2026-05-30', end:'2026-06-09', status:'completada', note:'Survey123 con índice P×E×V, Web Map de amenazas e infraestructura, dashboard ejecutivo y ficha PDF automática (Power Automate).'},
+
+  {id:'h1', phase:'Coordinación institucional', name:'Etapa 4 · Presentación a Directora Nacional', start:'2026-06-19', end:'2026-06-19', status:'hito', note:'Feedback: coordinar con SID (eventos históricos), colaboración interinstitucional para levantar capacidades, y analizar planes nacionales/regionales + anexos para levantar cursos de acción.'},
+  {id:'h2', phase:'Coordinación institucional', name:'Etapa 5 · Reunión con M. Riffo (VISOR GRD)', start:'2026-06-25', end:'2026-06-25', status:'hito', note:'El VISOR GRD ya tiene estructura de escenario de impacto (infraestructura y población expuesta + zonificación de amenaza). Opción: que su unidad construya el geoproceso en AGOL.'},
+  {id:'h3', phase:'Coordinación institucional', name:'Etapa 8 · Reunión con Jefe Depto Información Territorial', start:'2026-07-14', end:'2026-07-14', status:'hito', note:'Presentación del proyecto de escenarios de riesgo. Ratifica que el VISOR GRD está en actualización y hay disposición a incorporar nuevas herramientas. Se acuerda enviar el piloto para que la empresa a cargo evalúe la factibilidad de automatizar el proceso con los inputs disponibles.'},
+
+  {id:'e6', phase:'Consolidación de datos base', name:'Etapa 6 · Consolidación de cursos de acción (128 planes)', start:'2026-06-26', end:'2026-07-07', status:'completada', note:'De 2 a 128 planes, 5.348 COA, 17 regiones y 22 amenazas. Motor de consultas + análisis de brechas (30 brechas, 4 críticas).'},
+  {id:'e7', phase:'Consolidación de datos base', name:'Etapa 7 · Consolidación de alertas históricas 2017–2025', start:'2026-07-01', end:'2026-07-09', status:'completada', note:'alertas_consolidado_2017_2025.xlsx, 37.124 filas validadas.'},
+  {id:'e7b', phase:'Consolidación de datos base', name:'Etapa 7b · Consolidación de eventos SID', start:'2026-07-08', end:'2026-08-15', status:'en_curso', note:'Auditados 4 de 28 archivos. Pendiente: eventos de origen antrópico y 24 archivos restantes.'},
+
+  {id:'p1', phase:'Pendientes · metodología y geoproceso', name:'Definir metodología de incorporación de COA al escenario', start:'2026-07-14', end:'2026-08-22', status:'pendiente', note:'Cómo se incorporan los cursos de acción al escenario de riesgo (regla de vínculo COA ↔ escenario por amenaza/nivel de alerta).'},
+  {id:'p2', phase:'Pendientes · metodología y geoproceso', name:'Resolver llave CAT-SID y cruce SID × Alertas', start:'2026-07-10', end:'2026-08-15', status:'en_curso', note:'La llave (año + n° informe + letra) no calza con los archivos SID, donde "Ampliación Evento" concatena las letras. Destraba poblar T3_Eventos_SID.'},
+  {id:'p3', phase:'Pendientes · metodología y geoproceso', name:'Formalizar geoproceso AGOL con unidad de M. Riffo', start:'2026-07-15', end:'2026-09-15', status:'pendiente', note:'Definir quién construye el geoproceso y cómo el resultado de infraestructura/población expuesta alimenta el índice P×E×V.'},
+  {id:'p8', phase:'Pendientes · metodología y geoproceso', name:'Enviar piloto al VISOR GRD para evaluación de factibilidad', start:'2026-07-17', end:'2026-08-08', status:'pendiente', note:'Enviar el piloto al Depto de Información Territorial. La empresa a cargo de la actualización del VISOR GRD evaluará la factibilidad de incorporar una herramienta que automatice el proceso con los inputs de información disponibles.'},
+  {id:'p4', phase:'Pendientes · metodología y geoproceso', name:'Gestión de acceso a coberturas espaciales (AGOL)', start:'2026-08-01', end:'2026-09-30', status:'pendiente', note:'Población (censo/manzanas INE) e infraestructura crítica en el AGOL institucional.'},
+  {id:'p5', phase:'Pendientes · metodología y geoproceso', name:'Colaboración interinstitucional (levantamiento de capacidades)', start:'2026-08-01', end:'2026-10-31', status:'pendiente', note:'Mandato de la Directora, sin acciones concretas asociadas aún.'},
+  {id:'p6', phase:'Pendientes · metodología y geoproceso', name:'Retomar Sprint 4 · BOSAI + modelo de exposición', start:'2026-09-01', end:'2026-11-15', status:'en_pausa', note:'Hipótesis de escenario, árbol de fallas, ICO por institución, CA por nivel de alerta.'},
+  {id:'p7', phase:'Pendientes · metodología y geoproceso', name:'Definir integración del antecedente histórico (factor vs capa)', start:'2026-09-01', end:'2026-10-15', status:'pendiente', note:'¿Factor multiplicador del escenario base o capa independiente? A decidir con la Directora.'},
+];
+
+const STATUS_CYCLE = ['pendiente','en_curso','en_pausa','completada'];
+const STATUS_LABEL = {pendiente:'Pendiente', en_curso:'En curso', en_pausa:'En pausa', completada:'Completada', hito:'Hito'};
+const STATUS_VAR   = {pendiente:'--pending', en_curso:'--active', en_pausa:'--paused', completada:'--done', hito:'--hito'};
+
+let tasks = [];
+function daysBetween(a,b){ return (b-a)/(1000*60*60*24); }
+const totalDays = daysBetween(RANGE_START, RANGE_END);
+function pct(dateStr){ return (daysBetween(RANGE_START, new Date(dateStr)) / totalDays) * 100; }
+
+// Almacenamiento: usa window.storage dentro del visor de Claude; en GitHub
+// Pages o cualquier navegador cae automáticamente a localStorage.
+const store = {
+  hasWS(){ return typeof window!=='undefined' && window.storage && typeof window.storage.get==='function'; },
+  async get(key){
+    if(this.hasWS()){ try{ return await window.storage.get(key); }catch(e){} }
+    try{ const v = localStorage.getItem(key); return v!=null ? {value:v} : null; }catch(e){ return null; }
+  },
+  async set(key,val){
+    if(this.hasWS()){ try{ return await window.storage.set(key,val); }catch(e){} }
+    try{ localStorage.setItem(key,val); }catch(e){}
+  }
+};
+
+let CURRENT_VERSION = EMBEDDED_VERSION;
+let SOURCE_TASKS = EMBEDDED_TASKS;
+
+async function loadTasks(){
+  // MODO SUPABASE: la base de datos es la fuente de verdad
+  if(sb){
+    try{
+      const { data, error } = await sb.from('tareas').select('*').order('orden');
+      if(error) throw error;
+      if(Array.isArray(data) && data.length){ tasks = data; return; }
+    }catch(e){
+      console.error('Supabase no disponible, uso respaldo local:', e);
+      toast('Sin conexión a Supabase — mostrando respaldo local');
+    }
+  }
+  // MODO RESPALDO: tareas.json / embebido + guardado local
+  let fileData = null;
+  try{
+    const r = await fetch('./tareas.json', {cache:'no-store'});
+    if(r.ok) fileData = await r.json();
+  }catch(e){}
+  SOURCE_TASKS    = (fileData && Array.isArray(fileData.tareas)) ? fileData.tareas : EMBEDDED_TASKS;
+  CURRENT_VERSION = (fileData && fileData.version != null)       ? fileData.version : EMBEDDED_VERSION;
+  let saved = null;
+  try{ const v = await store.get(STORAGE_KEY); saved = v && v.value ? JSON.parse(v.value) : null; }catch(e){}
+  if(saved && saved.version === CURRENT_VERSION && Array.isArray(saved.tareas) && saved.tareas.length){
+    tasks = saved.tareas;
+  } else {
+    tasks = SOURCE_TASKS.map(x=>({...x}));
+    await saveLocal();
+  }
+}
+async function saveLocal(){ await store.set(STORAGE_KEY, JSON.stringify({version:CURRENT_VERSION, tareas:tasks})); }
+async function reloadBoard(){ await loadTasks(); render(); toast('Recargado'); }
+
+function monthLabels(){
+  const labels = [];
+  let cur = new Date(RANGE_START);
+  while(cur <= RANGE_END){ labels.push(new Date(cur)); cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1); }
+  return labels;
+}
+
+function render(){
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  const chart = document.createElement('div');
+  chart.className = 'chart';
+
+  const months = monthLabels();
+  const monthW = 100 / months.length;
+
+  const monthsRow = document.createElement('div');
+  monthsRow.className = 'months';
+  const spacer = document.createElement('div');
+  spacer.style.width = '308px'; spacer.style.flexShrink = '0';
+  monthsRow.appendChild(spacer);
+  const mTrack = document.createElement('div');
+  mTrack.style.flex = '1'; mTrack.style.display = 'flex';
+  months.forEach(m=>{
+    const el = document.createElement('div');
+    el.className = 'month-label';
+    el.style.width = monthW + '%';
+    el.textContent = m.toLocaleDateString('es-CL',{month:'short',year:'2-digit'}).replace('.','');
+    mTrack.appendChild(el);
+  });
+  monthsRow.appendChild(mTrack);
+  chart.appendChild(monthsRow);
+
+  const grid = document.createElement('div');
+  grid.className = 'grid-scroll';
+  const inner = document.createElement('div');
+  inner.style.position = 'relative';
+
+  let lastPhase = null;
+  tasks.forEach(t=>{
+    if(t.phase !== lastPhase){
+      const pr = document.createElement('div');
+      pr.className = 'phase-row';
+      pr.textContent = t.phase;
+      inner.appendChild(pr);
+      lastPhase = t.phase;
+    }
+    const row = document.createElement('div');
+    row.className = 'task-row';
+    const name = document.createElement('div');
+    name.className = 'task-name';
+    name.textContent = t.name;
+    row.appendChild(name);
+
+    const track = document.createElement('div');
+    track.className = 'track';
+    const left = pct(t.start);
+
+    if(t.status === 'hito'){
+      const dia = document.createElement('div');
+      dia.className = 'mstone';
+      dia.style.left = left + '%';
+      dia.addEventListener('mousemove', e=> showTooltip(e, t));
+      dia.addEventListener('mouseleave', hideTooltip);
+      const lbl = document.createElement('div');
+      lbl.className = 'mstone-label';
+      lbl.style.left = 'calc(' + left + '% + 13px)';
+      lbl.textContent = new Date(t.start).toLocaleDateString('es-CL',{day:'2-digit',month:'short'}).replace('.','');
+      track.appendChild(dia);
+      track.appendChild(lbl);
+    } else {
+      const right = pct(t.end);
+      const bar = document.createElement('div');
+      bar.className = 'bar ' + t.status;
+      bar.style.left = left + '%';
+      bar.style.width = Math.max(right-left, 1.4) + '%';
+      bar.textContent = STATUS_LABEL[t.status];
+      bar.addEventListener('click', ()=> cycleStatus(t.id));
+      bar.addEventListener('mousemove', e=> showTooltip(e, t));
+      bar.addEventListener('mouseleave', hideTooltip);
+      track.appendChild(bar);
+    }
+    row.appendChild(track);
+    inner.appendChild(row);
+  });
+
+  const todayPct = pct(TODAY.toISOString().slice(0,10));
+  const tl = document.createElement('div');
+  tl.className = 'today-line';
+  tl.style.left = 'calc(308px + (100% - 308px) * ' + (todayPct/100) + ')';
+  const tt = document.createElement('div');
+  tt.className = 'today-tag';
+  tt.textContent = 'Hoy';
+  tt.style.left = 'calc(308px + (100% - 308px) * ' + (todayPct/100) + ')';
+  inner.appendChild(tl);
+  inner.appendChild(tt);
+
+  grid.appendChild(inner);
+  chart.appendChild(grid);
+  board.appendChild(chart);
+  updateStat();
+}
+
+function updateStat(){
+  const real = tasks.filter(t=>t.status!=='hito');
+  const done = real.filter(t=>t.status==='completada').length;
+  document.getElementById('pct').textContent = Math.round((done/real.length)*100) + '%';
+}
+
+async function cycleStatus(id){
+  const t = tasks.find(x=>x.id===id);
+  if(!t || t.status==='hito') return;
+  const idx = STATUS_CYCLE.indexOf(t.status);
+  const next = STATUS_CYCLE[(idx+1) % STATUS_CYCLE.length];
+  t.status = next;
+  render();
+  if(sb){
+    try{
+      const { error } = await sb.from('tareas').update({ status: next }).eq('id', id);
+      if(error) throw error;
+      toast('Guardado en la nube ✓');
+    }catch(e){ console.error(e); toast('No se pudo guardar en Supabase'); }
+  } else {
+    await saveLocal();
+  }
+}
+
+function showTooltip(e, t){
+  const tip = document.getElementById('tooltip');
+  tip.style.display = 'block';
+  tip.style.left = (e.clientX + 14) + 'px';
+  tip.style.top = (e.clientY + 14) + 'px';
+  const fecha = t.status==='hito'
+    ? new Date(t.start).toLocaleDateString('es-CL')
+    : new Date(t.start).toLocaleDateString('es-CL') + ' → ' + new Date(t.end).toLocaleDateString('es-CL');
+  tip.innerHTML = '<div class="tt-name">'+t.name+'</div>'+
+    '<div class="tt-date">'+fecha+'</div>'+
+    '<div class="status" style="color:var('+STATUS_VAR[t.status]+')">'+STATUS_LABEL[t.status]+'</div>'+
+    (t.note ? '<div style="margin-top:5px;color:var(--muted);">'+t.note+'</div>' : '');
+}
+function hideTooltip(){ document.getElementById('tooltip').style.display = 'none'; }
+
+let _toastT;
+function toast(msg){
+  const el = document.getElementById('toast');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.opacity = '1';
+  el.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(_toastT);
+  _toastT = setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateX(-50%) translateY(20px)'; }, 2200);
+}
+
+(async function init(){ await loadTasks(); render(); })();
+</script>
+</body>
+</html>
